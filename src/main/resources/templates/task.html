@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Task Management</title>
+  <!-- FontAwesome CDN for Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+  <style>
+    body {
+      font-family: 'Poppins', 'Segoe UI', Arial, sans-serif;
+      background: linear-gradient(135deg, #7f53ac 0%, #647dee 100%);
+      margin: 0;
+      min-height: 100vh;
+      color: #382a67;
+    }
+    h1 {
+      text-align: center;
+      color: #fff;
+      margin-top: 38px;
+      font-size: 2.8rem;
+      letter-spacing: 2px;
+      text-shadow: 0 2px 20px #382a6785;
+    }
+    .container {
+      max-width: 600px;
+      margin: 40px auto;
+      background: #fff;
+      border-radius: 24px;
+      box-shadow: 0 6px 32px 0 #382a6722;
+      padding: 36px 24px 26px 24px;
+      position: relative;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: transparent;
+      margin-bottom: 18px;
+    }
+    th, td {
+      padding: 16px 10px;
+      text-align: center;
+      font-size: 1.13rem;
+      border-bottom: 1px solid #efebff;
+      vertical-align: middle;
+    }
+    th {
+      background: linear-gradient(90deg, #43cea2 0%, #185a9d 100%);
+      color: #fff;
+      font-weight: 700;
+      letter-spacing: 1px;
+    }
+    tr:hover {
+      background: #f7f3ff;
+      transition: 0.2s;
+    }
+    .task-card {
+      box-shadow: 0 2px 10px #7f53ac2e;
+      border-radius: 14px;
+      transition: box-shadow 0.2s;
+    }
+    .task-card:hover {
+      box-shadow: 0 6px 22px #7f53ac55;
+    }
+    button {
+      padding: 9px 18px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+      font-size: 1.09rem;
+      transition: transform 0.17s, box-shadow 0.17s;
+      box-shadow: 0 2px 10px #43cea288;
+      margin: 0;
+    }
+    button:active {
+      transform: scale(0.97);
+    }
+    .submit-btn {
+      background: linear-gradient(90deg, #ffb347 0%, #43cea2 82%);
+      color: #fff;
+      box-shadow: 0 4px 14px #ffe7c37a;
+    }
+    .submit-btn:hover {
+      background: linear-gradient(85deg, #ffb347 20%, #185a9d 90%);
+    }
+    .inline-delete {
+      background: linear-gradient(90deg, #ff5858 0%, #f857a6 100%);
+      color: #fff;
+      font-size: 1.06rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      box-shadow: 0 2px 8px #ffb34766;
+    }
+    .inline-delete:hover {
+      background: linear-gradient(60deg, #ff2222 10%, #aa3f8e 80%);
+    }
+    .inline-delete-wrapper {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100%;
+    }
+    form.add-task-form {
+      display: flex;
+      justify-content: center;
+      margin-top: 36px;
+      gap: 10px;
+    }
+    input[type="text"] {
+      padding: 13px 12px;
+      flex: 1;
+      border: 1.7px solid #43cea2;
+      border-radius: 10px;
+      font-size: 1.08rem;
+      background: #f7f3ff;
+      color: #382a67;
+      outline: none;
+      transition: border 0.2s;
+    }
+    input[type="text"]:focus {
+      border: 1.7px solid #185a9d;
+    }
+    input[type="checkbox"] {
+      accent-color: #43cea2;
+      width: 25px;
+      height: 25px;
+      cursor: pointer;
+    }
+    .checkbox-wrapper {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+    }
+    .fa-check-circle {
+      color: #43cea2;
+      font-size: 1.36rem;
+      margin-left: 5px;
+      vertical-align: middle;
+    }
+    .wrong-message {
+      color: #ff4b4b;
+      text-align: center;
+      font-size: 1.2rem;
+      margin-top: 13px;
+    }
+    .completed {
+      text-decoration: line-through;
+      color: #aaa;
+    }
+    .no-tasks {
+      text-align: center;
+      font-size: 1.19rem;
+      color: #8576ff;
+      margin-top: 16px;
+      padding: 12px;
+      background: linear-gradient(90deg, #43cea2 0%, #ffe49c 100%);
+      border-radius: 12px;
+      box-shadow: 0 1px 10px #ffd3b355;
+      font-weight: 500;
+      letter-spacing: 1.5px;
+    }
+    @media (max-width: 620px) {
+      .container { padding: 11px 3px; }
+      table th, table td { font-size: 0.98rem; padding: 9px 1px; }
+      form.add-task-form { flex-direction: column; gap: 6px; }
+      input[type="text"] { width: 100%; padding:11px 10px;}
+    }
+  </style>
+  <script>
+    window.addEventListener('DOMContentLoaded', () => {
+      const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+      checkboxes.forEach(cb => {
+        cb.addEventListener('change', function() {
+          const taskCell = this.closest('tr').querySelector('td:nth-child(2)');
+          const iconCell = this.closest('tr').querySelector('.checkbox-icon');
+          if (this.checked) {
+            taskCell.classList.add('completed');
+            iconCell.innerHTML = '<i class="fa-solid fa-check-circle"></i>';
+          } else {
+            taskCell.classList.remove('completed');
+            iconCell.innerHTML = '';
+          }
+        });
+      });
+    });
+  </script>
+</head>
+<body>
+  <h1>
+    <i class="fa-solid fa-list-check"></i>
+    Task Manager
+    <i class="fa-solid fa-sparkles"></i>
+  </h1>
+  <div class="container">
+
+    <!-- No tasks -->
+    <div th:if="${#lists.isEmpty(tasks)}" class="no-tasks">
+      <i class="fa-solid fa-face-smile-wink"></i> All tasks done! Enjoy your day.
+    </div>
+
+    <!-- Tasks Table with Icons -->
+    <table th:if="${!#lists.isEmpty(tasks)}">
+      <tr>
+        <th>#</th>
+        <th>Task</th>
+        <th>Status</th>
+        <th>Action</th>
+      </tr>
+      <tr th:each="task, iterStat : ${tasks}" class="task-card">
+        <td th:text="${iterStat.index + 1}">1</td>
+        <td th:text="${task}">Task Name</td>
+        <td class="checkbox-wrapper">
+          <input type="checkbox">
+          <span class="checkbox-icon"></span>
+        </td>
+        <td>
+          <form th:action="@{/delete_task}" method="post" class="inline-delete-wrapper">
+            <input type="hidden" name="taskNumber" th:value="${iterStat.index + 1}" />
+            <button type="submit" class="inline-delete">
+              <i class="fa-solid fa-trash-can"></i> Delete
+            </button>
+          </form>
+        </td>
+      </tr>
+    </table>
+
+    <!-- Add Task Form -->
+    <form action="/process_task" method="post" class="add-task-form">
+      <input type="text" name="taskName" placeholder="🌈 Add a new task...">
+      <button type="submit" class="submit-btn">
+        <i class="fa-solid fa-plus"></i> Add Task
+      </button>
+    </form>
+  </div>
+</body>
+</html>
